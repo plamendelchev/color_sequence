@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+from collections import deque
 
 def populate_matrix(args):
     matrix = []
@@ -33,58 +34,45 @@ def populate_matrix(args):
 
     return matrix
 
-# Function to check if a cell `(i, j)` is valid or not
-def is_valid(matrix, i, j):
-    return 0 <= i < len(matrix) and 0 <= j < len(matrix)
+def find_size(matrix, i, j, is_marked):
+    queue = deque()
 
-def find_size(matrix, i, j):
-    # if the cell is invalid
-    if not is_valid(matrix, i, j):
-        return 0
-
-    # construct a unique dictionary key from dynamic elements of the input
     key = (i, j)
+    is_marked[key] = True
+    queue.append(key)
 
-    if key not in is_marked:
-        is_marked[key] = True
-    elif key in is_marked and is_marked[key]:
-        return 0
-    else:
-        is_marked[key] = True
+    count = 0
 
-    # string to store size starting `(i, j)`
-    size = 0
-    temp_size = 0
+    while queue:
+        key_index = queue.popleft()
+        count += 1
+        i, j = key_index
 
-    # recur top cell if its value is +1 of value at `(i, j)`
-    if i > 0 and matrix[i - 1][j] == matrix[i][j]:
-        temp_size = find_size(matrix, i - 1, j)
-        if temp_size > size:
-            size = temp_size
+        key = (i - 1, j)
+        if i > 0 and matrix[i - 1][j] == matrix[i][j]:
+            if key not in is_marked:
+                queue.append(key)
+                is_marked[key] = True
 
-    # recur right cell if its value is +1 of value at `(i, j)`
-    if j + 1 < len(matrix) and matrix[i][j + 1] == matrix[i][j]:
-        temp_size = find_size(matrix, i, j + 1)
-        if temp_size > size:
-            size = temp_size
+        key = (i, j + 1)
+        if j + 1 < len(matrix) and matrix[i][j + 1] == matrix[i][j]:
+            if key not in is_marked:
+                queue.append(key)
+                is_marked[key] = True
 
-    # recur bottom cell if its value is +1 of value at `(i, j)`
-    if i + 1 < len(matrix) and matrix[i + 1][j] == matrix[i][j]:
-        temp_size = find_size(matrix, i + 1, j)
-        if temp_size > size:
-            size = temp_size
+        key = (i + 1, j)
+        if i + 1 < len(matrix) and matrix[i + 1][j] == matrix[i][j]:
+            if key not in is_marked:
+                queue.append(key)
+                is_marked[key] = True
 
-    # recur left cell if its value is +1 of value at `(i, j)`
-    if j > 0 and matrix[i][j - 1] == matrix[i][j]:
-        temp_size = find_size(matrix, i, j - 1)
-        if temp_size > size:
-            size = temp_size
+        key = (i, j - 1)
+        if j > 0 and matrix[i][j - 1] == matrix[i][j]:
+            if key not in is_marked:
+                queue.append(key)
+                is_marked[key] = True
 
-    is_marked[key] = False
-    size += 1
-
-    # return size starting from `(i, j)`
-    return size
+    return count
 
 if __name__ == '__main__':
     res_size = -1
@@ -96,9 +84,12 @@ if __name__ == '__main__':
     # Find longest adjasent sequence in matrix
     for i in range(len(matrix)):
         for j in range(len(matrix)):
-            s = find_size(matrix, i, j)
+            key = (i, j)
 
-            if s > res_size:
-                res_size = s
+            if key not in is_marked:
+                s = find_size(matrix, i, j, is_marked)
+
+                if s > res_size:
+                    res_size = s
 
     print(res_size)
