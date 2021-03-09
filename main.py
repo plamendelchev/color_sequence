@@ -2,41 +2,36 @@
 
 import sys
 
-## Read and validate input
-#try:
-    #    rows, cols = [ int(x) for x in input('Please enter the dimensions of the matrix: ').split() ]
-    #except ValueError:
-        #    raise SystemExit('Please enter two whitespace-separated integers. ')
-        #
+def populate_matrix(args):
+    matrix = []
 
-## Create an empty list to store the matrix
-#matrix = []
-## Populate the matrix from input
-#for row in range(rows):
-    #    current_row = input(f'{row} row: ').split()
-    #
-    #    if not len(current_row) == cols:
-        #        raise SystemExit(f'Please enter {cols} columns, not {len(current_row)} ')
-        #
-        #    matrix.append(current_row)
-        #
-        #print(matrix)
+    ## When no arguments are given
+    if not len(args):
+        ## Read and validate input
+        try:
+            rows, cols = [ int(x) for x in input('Please enter the dimensions of the matrix: ').split() ]
+        except ValueError:
+            raise SystemExit('Please enter two whitespace-separated integers. ')
 
-args = sys.argv[1:]
-matrix = []
+        ## Populate the matrix from input
+        for row in range(rows):
+            current_row = input(f'{row} row: ').split()
 
-if not len(args):
-    sys.exit('mitko')
+            if not len(current_row) == cols:
+                raise SystemExit(f'Please enter {cols} columns, not {len(current_row)} ')
 
-for file in args:
-    with open(file, 'r') as reader:
-        for line in reader:
-            matrix.append(line.strip('\n').split())
+            matrix.append(current_row)
+    ## When the matrix is provided from stdin
+    else:
+        for file in args:
+            with open(file, 'r') as reader:
+                for line in reader:
+                    matrix.append(line.strip('\n').split())
 
-rows, cols = [ int(x) for x in matrix[0] ]
-matrix[:] = matrix[1:]
+        rows, cols = [ int(x) for x in matrix[0] ]
+        matrix[:] = matrix[1:]
 
-######
+    return matrix
 
 # Function to check if a cell `(i, j)` is valid or not
 def is_valid(matrix, i, j):
@@ -85,24 +80,25 @@ def find_size(matrix, i, j):
         if temp_size > size:
             size = temp_size
 
-    # note that as the matrix contains all distinct elements,
-    # there is only one size possible from the current cell
-
     is_marked[key] = False
     size += 1
 
     # return size starting from `(i, j)`
     return size
 
-res_size = -1
-is_marked = {}
+if __name__ == '__main__':
+    res_size = -1
+    is_marked = {}
 
-# Find longest adjasent sequence in matrix
-for i in range(rows):
-    for j in range(cols):
-        s = find_size(matrix, i, j)
+    args = sys.argv[1:]
+    matrix = populate_matrix(args)
 
-        if s > res_size:
-            res_size = s
+    # Find longest adjasent sequence in matrix
+    for i in range(len(matrix)):
+        for j in range(len(matrix)):
+            s = find_size(matrix, i, j)
 
-print(res_size)
+            if s > res_size:
+                res_size = s
+
+    print(res_size)
